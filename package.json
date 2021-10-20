@@ -1,0 +1,23 @@
+{
+  "name": "enam",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ejs": "^3.1.6",
+    "express": "^4.17.1",
+    "ip": "^1.1.5",
+    "mysql2": "^2.3.0",
+    "nodejs-base64": "^2.0.0",
+    "qr": "^0.2.4",
+    "qrcode": "^1.4.4",
+    "sequelize": "^6.7.0",
+    "sqlite3": "^5.0.2"
+  }
+}
