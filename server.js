@@ -62,7 +62,7 @@ app.get("/intal/:no_permohonan", WrapHandler(accessView.get_intal));
 app.get(["/archives","/archive/:id"], WrapHandler(archive.get));
 app.get(["/archive/:id/count"], WrapHandler(archive.count));
 app.put(["/archives","/archive/:id"], WrapHandler(archive.put));
-app.post(["/archives","/archive/:id"], WrapHandler(archive.post));
+app.post(["/archives","/archive/:id","/archive/:id/:status"], WrapHandler(archive.post));
 app.delete(["/archives","/archive/:id"], WrapHandler(archive.remove));
 
 app.get(["/paspors","/paspors/:id"], WrapHandler(paspor.get));
