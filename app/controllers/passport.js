@@ -8,7 +8,6 @@ function isDate(date){
 } 
  
 PassportCtrl.get = async  (req,res) => {
-	console.log(req.params,req.query);
 	var id = req.params.id;
 	
 	var q = req.query._q;

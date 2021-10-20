@@ -1,32 +1,44 @@
 const { models } = require('../models');
-const { Op } = require('sequelize');
+const { Sequelize,Op } = require('sequelize');
+const { resolveInclude } = require('ejs');
 
 var ArchiveCtrl = {}
 ArchiveCtrl.count = async  (req,res) => {
-
+	cnt = await models.passport.count({where:{'archiveName': req.params.id}}) || 0;
+	res.status(200).json(cnt);
 };
 
 
 ArchiveCtrl.get = async  (req,res) => {
 	var id = req.params.id || false;
-	console.log(req.params);
 	var  archive= null;
 	
 	if (req.query.type){
-		var _order = ['name', 'DESC'];
+		var _order = [['updatedAt','DESC']];
 		if (req.query._sort){
-			_order = req.query._sort.split(':');
+			_order = [req.query._sort.split(':')];
+			console.log(_order);
 		};
-		archive = await models.archive.findAll(
-						{where: { type: req.query.type ,status:'Active'} },
-						{order: _order },
-						{ limit: 10 }
-					);
+		archive = await models.archive.findAll({
+						where: { type: req.query.type ,status:'Active'} ,
+						order: _order ,
+						limit: 10 
+					});
+		// archive['passport_count'] = await models.passport.count({where:{'archiveName': "Box 1"}});
 	}else if (id){
 		archive = await models.archive.findByPk(id);
+		archive.passport_count = models.passport.count({where:{archiveName:archive.name}});
 	}else{
-		archive = await models.archive.findAll({ limit: 10 });
+		archive = await models.archive.findAll({
+							 limit: 10 
+				// }).then(archives => { 
+				// 	cnt = await models.passport.count({where:{ archiveName :  archive.name }});
+				// 	archive['passport_cnt'] = cnt;
+				// 	return archive
+				});
+		// console.log( archive) ;
 		
+		console.log(archive)
 	}
 	if (archive){
 		res.status(200).json(archive);
@@ -50,7 +62,11 @@ ArchiveCtrl.put = async (req,res) => {
 ArchiveCtrl.post = async (req,res) => {
 	var id = req.params.id || false;
 	var body = req.body;
-	if (id){
+	if (req.query.active && req.query.type){
+		await models.archive.update({'status':'Inactive'},{where:{type: req.query.type}});
+		await models.archive.update({'status':'Active'},{where:{type: req.query.type , name:req.query.active}});
+		res.status(200).send(req.query.active);
+	}if (id){
 		await models.archive.update(req.body, {where: {name: id}} );
 		res.status(200).send(id);
 	}else{

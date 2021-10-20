@@ -28,14 +28,13 @@ function WrapHandler(handler) {
 }
 
 
-
+app.get('/',(req,res)=>{res.redirect('/qr')});
 app.get(["/qr","/qr/:role","/qr/:role/:doc_limit"], (req,res) => {
 
 	var ip = require("ip");
 	
 	const role = req.params.role || 'petugas';
 	const doc_limit = req.params.doc_limit ||  50;
-	console.log()
 	const config= {"baseURL": `http://${ip.address()}:${PORT}` };
 	config['role'] = role ;
 	config['doc_limit'] =  doc_limit;
