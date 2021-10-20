@@ -1,6 +1,7 @@
 const { models } = require('../models');
 const { Sequelize,Op } = require('sequelize');
 const { resolveInclude } = require('ejs');
+const archive = require('../models/archive');
 
 var ArchiveCtrl = {}
 ArchiveCtrl.count = async  (req,res) => {
@@ -62,10 +63,14 @@ ArchiveCtrl.put = async (req,res) => {
 ArchiveCtrl.post = async (req,res) => {
 	var id = req.params.id || false;
 	var body = req.body;
-	if (req.query.active && req.query.type){
-		await models.archive.update({'status':'Inactive'},{where:{type: req.query.type}});
-		await models.archive.update({'status':'Active'},{where:{type: req.query.type , name:req.query.active}});
-		res.status(200).send(req.query.active);
+	if (req.params.status && id){
+		archive = await models.archive.findByPk(id).then (archive => {
+					await models.archive.update({'status': req.params.status},{where:{id}});
+					await models.archive.update({'status':'Inactive'},{where:{type: archive.type}}).then(rec => {
+						res.status(200).send(id);
+					})
+				});
+		res.status(200).send(id);
 	}if (id){
 		await models.archive.update(req.body, {where: {name: id}} );
 		res.status(200).send(id);
