@@ -2,6 +2,7 @@ const { models } = require('../models');
 const { Sequelize,Op } = require('sequelize');
 const { resolveInclude } = require('ejs');
 const archive = require('../models/archive');
+const sequelize = require('sequelize');
 
 var ArchiveCtrl = {}
 ArchiveCtrl.count = async  (req,res) => {
@@ -9,6 +10,16 @@ ArchiveCtrl.count = async  (req,res) => {
 	res.status(200).json(cnt);
 };
 
+ArchiveCtrl.typeCount = async (req,res) => {
+	var type  = req.params.type ||  req.query.type;
+	if ( ['wni','wna'].includes(type)) { 
+		cnt = await models.archive.count({where:{'type': type}}) || 0;
+		res.status(200).json(cnt);
+	}else{
+		cnt = await models.passport.count({where:{'archiveName': type}}) || 0;
+		res.status(200).json(cnt);
+	}
+}
 
 ArchiveCtrl.get = async  (req,res) => {
 	var id = req.params.id || false;
@@ -25,21 +36,14 @@ ArchiveCtrl.get = async  (req,res) => {
 						order: _order ,
 						limit: 10 
 					});
-		// archive['passport_count'] = await models.passport.count({where:{'archiveName': "Box 1"}});
 	}else if (id){
 		archive = await models.archive.findByPk(id);
 		archive.passport_count = models.passport.count({where:{archiveName:archive.name}});
 	}else{
 		archive = await models.archive.findAll({
-							 limit: 10 
-				// }).then(archives => { 
-				// 	cnt = await models.passport.count({where:{ archiveName :  archive.name }});
-				// 	archive['passport_cnt'] = cnt;
-				// 	return archive
-				});
-		// console.log( archive) ;
-		
-		console.log(archive)
+							 limit: 10,
+							 order: _order
+						});
 	}
 	if (archive){
 		res.status(200).json(archive);
@@ -64,10 +68,11 @@ ArchiveCtrl.post = async (req,res) => {
 	var id = req.params.id || false;
 	var body = req.body;
 	if (req.params.status && id){
-		archive = await models.archive.findByPk(id).then (archive => {
-					await models.archive.update({'status': req.params.status},{where:{id}});
-					await models.archive.update({'status':'Inactive'},{where:{type: archive.type}}).then(rec => {
+		archive = await models.archive.findByPk(id).then( (archive) => {
+					models.archive.update({'status': req.params.status},{where:{id}});
+					models.archive.update({'status':'Inactive'},{where:{type: archive.type}}).then( (rec) => {
 						res.status(200).send(id);
+						sequelize.Promise.resolve(id);
 					})
 				});
 		res.status(200).send(id);
@@ -75,6 +80,7 @@ ArchiveCtrl.post = async (req,res) => {
 		await models.archive.update(req.body, {where: {name: id}} );
 		res.status(200).send(id);
 	}else{
+		await models.archive.update({'status': 'Inactive'},{where:{type:req.body['type']}})
 		await models.archive.create(req.body);
 		res.status(201).send(body['name']);
 	}
@@ -88,4 +94,3 @@ ArchiveCtrl.remove = async  (req,res) => {
 }
  
 module.exports = ArchiveCtrl;
- 

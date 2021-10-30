@@ -21,7 +21,7 @@ function convertToResponse(rec, wna=0){
 		obj['noKTP'] = rec['niora'];
 		obj['noPassport'] = rec['no_paspor'];
 		obj['dateBirth'] = rec['tgl_lahir'];
-		obj['datePrint'] = rec['c'];
+		obj['datePrint'] = rec['dokim_akhir'];
 		obj['gender'] = rec['jenis_kelamin'];
 		obj['type'] = 'ijin_tinggal';
 		obj['status'] = rec['sub_tahapan'];
@@ -53,17 +53,15 @@ AccessView.get_spri = (req, res) => {
             database: 'spri_local'
         });
 	connection.query( "SELECT 'paspor' as type,nomor_permohonan as code, \
-						nama_pemohon as name, \
-						niora as noKTP  ,\
-						no_paspor as no noPassport,  \
+						nama_lengkap as name, \
+						nomor_register as noKTP  ,\
+						no_paspor as noPassport,  \
 						date(tanggal_lahir) as dateBirth,  \
 						date(tanggal_dikeluarkan) as datePrint ,\
 						jenis_kelamin as gender, \
 						tahapan as status \
 						FROM `datapaspor` WHERE nomor_permohonan = ? ", [no_permohonan],(err,rec) => {
-		// console.log(err)
-		var ret = Object.assign({}, rec[0]);
-		// obj = convertToResponse(ret,0);
+		var ret = Object.assign({}, rec.pop());
 		res.send(ret);			
 	});
 };
@@ -79,19 +77,18 @@ port: '11642',
             password: 'wnaV!3wknb3law4n!',
             database: 'db_it_kanim'
         });
-	connection.query("SELECT SELECT 'ijin_tinggal' as type,no_permohonan as code, \
-						nama_lengkap as name, \
-						niora as noKTP  ,\
-						no_paspor as no noPassport,  \
+	connection.query("SELECT 'ijin_tinggal' as `type`, no_permohonan as code, \
+						nama_pemohon as name, \
+						niora as noKTP ,no_paspor as noPassport,  \
 						date(tgl_lahir) as dateBirth,  \
-						date(tanggal_dikeluarkan) as datePrint ,\
+						date(dokim_akhir) as datePrint ,\
 						jenis_kelamin as gender, \
 						sub_tahapan as status \
 					FROM `data_wna` WHERE no_permohonan = ? ", [no_permohonan],(err,rec) => {
-		console.log(err)
+		console.log(err,rec)
 		var ret = Object.assign({}, rec[0]);
 		// obj = convertToResponse(ret,1);
-		res.send(ret);			
+		res.send(rec);			
 	});
 };
 

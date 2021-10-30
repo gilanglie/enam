@@ -27,15 +27,24 @@ function WrapHandler(handler) {
 	};
 }
 
+app.get('/', function(req, res){
+    res.redirect('/qr');
+});
 
-app.get('/',(req,res)=>{res.redirect('/qr')});
 app.get(["/qr","/qr/:role","/qr/:role/:doc_limit"], (req,res) => {
 
 	var ip = require("ip");
 	
 	const role = req.params.role || 'petugas';
 	const doc_limit = req.params.doc_limit ||  50;
-	const config= {"baseURL": `http://${ip.address()}:${PORT}` };
+	
+	var baseURL = `http://${req.hostname}`;
+	
+	if (['localhost','127.0.0.1'].includes( req.hostname )){
+		baseURL = `http://${ip.address()}:${PORT}`;
+	}
+	
+	const config= {"baseURL": baseURL };
 	config['role'] = role ;
 	config['doc_limit'] =  doc_limit;
 	config['name'] = `eNAM ${role}`;
@@ -59,10 +68,10 @@ app.get("/intal/:no_permohonan", WrapHandler(accessView.get_intal));
 // GET INTAL DATA
 
 
+app.get(["/archives/count","/archive/:type/count"], WrapHandler(archive.typeCount));
 app.get(["/archives","/archive/:id"], WrapHandler(archive.get));
-app.get(["/archive/:id/count"], WrapHandler(archive.count));
 app.put(["/archives","/archive/:id"], WrapHandler(archive.put));
-app.post(["/archives","/archive/:id","/archive/:id/:status"], WrapHandler(archive.post));
+app.post(["/archives","/archive/:id"], WrapHandler(archive.post));
 app.delete(["/archives","/archive/:id"], WrapHandler(archive.remove));
 
 app.get(["/paspors","/paspors/:id"], WrapHandler(paspor.get));
