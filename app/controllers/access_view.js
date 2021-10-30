@@ -21,7 +21,7 @@ function convertToResponse(rec, wna=0){
 		obj['noKTP'] = rec['niora'];
 		obj['noPassport'] = rec['no_paspor'];
 		obj['dateBirth'] = rec['tgl_lahir'];
-		obj['datePrint'] = rec['dokim_akhir'];
+		obj['datePrint'] = rec['c'];
 		obj['gender'] = rec['jenis_kelamin'];
 		obj['type'] = 'ijin_tinggal';
 		obj['status'] = rec['sub_tahapan'];
@@ -52,18 +52,26 @@ AccessView.get_spri = (req, res) => {
             password: 'spriV!3wknbel4wan!',
             database: 'spri_local'
         });
-	connection.query( "SELECT * FROM `datapaspor` WHERE nomor_permohonan = ? ", [no_permohonan],(err,rec) => {
-		console.log(err)
+	connection.query( "SELECT 'paspor' as type,nomor_permohonan as code, \
+						nama_pemohon as name, \
+						niora as noKTP  ,\
+						no_paspor as no noPassport,  \
+						date(tanggal_lahir) as dateBirth,  \
+						date(tanggal_dikeluarkan) as datePrint ,\
+						jenis_kelamin as gender, \
+						tahapan as status \
+						FROM `datapaspor` WHERE nomor_permohonan = ? ", [no_permohonan],(err,rec) => {
+		// console.log(err)
 		var ret = Object.assign({}, rec[0]);
-		obj = convertToResponse(ret,0);
-		res.send(obj);			
+		// obj = convertToResponse(ret,0);
+		res.send(ret);			
 	});
 };
 
 AccessView.get_intal = async (req, res) => {
 	const no_permohonan = req.params.no_permohonan;
 	const connection = await mysql.createConnection({
-//            host: '10.2.18.17',
+//            host: '10.2.8.17',
 //            port: '3307',
 host: '8.tcp.ngrok.io',
 port: '11642',
@@ -71,11 +79,19 @@ port: '11642',
             password: 'wnaV!3wknb3law4n!',
             database: 'db_it_kanim'
         });
-	connection.query( "SELECT * FROM `data_wna` WHERE no_permohonan = ? ", [no_permohonan],(err,rec) => {
+	connection.query("SELECT SELECT 'ijin_tinggal' as type,no_permohonan as code, \
+						nama_lengkap as name, \
+						niora as noKTP  ,\
+						no_paspor as no noPassport,  \
+						date(tgl_lahir) as dateBirth,  \
+						date(tanggal_dikeluarkan) as datePrint ,\
+						jenis_kelamin as gender, \
+						sub_tahapan as status \
+					FROM `data_wna` WHERE no_permohonan = ? ", [no_permohonan],(err,rec) => {
 		console.log(err)
 		var ret = Object.assign({}, rec[0]);
-		obj = convertToResponse(ret,1);
-		res.send(obj);			
+		// obj = convertToResponse(ret,1);
+		res.send(ret);			
 	});
 };
 
