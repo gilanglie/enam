@@ -5,7 +5,7 @@ const archive = require('../models/archive');
 const sequelize = require('sequelize');
 
 var ArchiveCtrl = {}
-ArchiveCtrl.count = async  (req,res) => {
+ArchiveCtrl.typeCount = async  (req,res) => {
 	cnt = await models.passport.count({where:{'archiveName': req.params.id}}) || 0;
 	res.status(200).json(cnt);
 };
